@@ -4,34 +4,54 @@ Chapter 1: Getting started with reinforcement learning and PyTorch
 Author: Yuxi (Hayden) Liu
 '''
 
-import gym
+import gymnasium as  gym   
+import numpy as np
+import ale_py
 
+# Регистрация среды Atari (ALE) в gymnasium
+gym.register_envs(ale_py)
 
-env = gym.make('SpaceInvaders-v0')
+# Создание среды SpaceInvaders с отображением в режиме "human"
+env = gym.make("ALE/SpaceInvaders-v5", render_mode="human", full_action_space=True)
 
-env.reset()
+# Обнуление среды и получение начального наблюдения
+observation, info = env.reset()
 
-env.render()
+# Информация о пространстве действий и наблюдений
+print("Action space:", env.action_space)  # Ожидается Discrete(6)
+print("Observation space:", env.observation_space)  # Ожидается Box(0, 255, (210, 160, 3), np.uint8)
 
-action = env.action_space.sample()
-new_state, reward, is_done, info = env.step(action)
-print(is_done)
-print(info)
-env.render()
+# Определение основных параметров игры
+num_episodes = 1  # количество эпизодов игры
+episode_reward = 0  # общий счёт
 
+# Основной игровой цикл
+for episode in range(num_episodes):
+    done = False
+    observation, info = env.reset()
+    episode_reward = 0
+    
+    while not done:
+        # Рендеринг кадра
+        env.render()
+        
+        # Случайное действие из пространства действий Discrete(6)
+        action = env.action_space.sample()
+        
+        # Шаг в среде
+        observation, reward, terminated, truncated, info = env.step(action)
+        
+        # Суммирование общего счёта за эпизод
+        episode_reward += reward
+        
+        # Проверка на завершение игры
+        done = terminated or truncated
+    
+    # Вывод общего счёта за эпизод
+    print(f"Episode {episode + 1} completed with total reward: {episode_reward}")
 
-is_done = False
-while not is_done:
-    action = env.action_space.sample()
-    new_state, reward, is_done, info = env.step(action)
-    print(info)
-    env.render()
-
-print(info)
-
-print(env.action_space)
-
-print(new_state.shape)
+# Закрытие среды
+env.close()
 
 
 
